@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
     };
     const proxyOptions = {
         '/logIn': frontendProxy,
+        '/signUp': frontendProxy,
+        '/getRedirectUri': frontendProxy,
+        '/genAccessToken': frontendProxy,
+        '/verifyAccessToken': frontendProxy,
         '/authenticate': frontendProxy,
         '/api/v2/graphql': frontendProxy,
         '/track': frontendProxy,

@@ -10,6 +10,7 @@ import auth.JAASConfigs;
 import auth.NativeAuthenticationConfigs;
 import auth.sso.SsoManager;
 import client.AuthServiceClient;
+import client.GHNAuthenticationClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.linkedin.common.urn.CorpuserUrn;
@@ -42,6 +43,7 @@ import play.mvc.Result;
 import play.mvc.Results;
 import security.AuthenticationManager;
 
+// TODO add logging.
 public class AuthenticationController extends Controller {
   public static final String AUTH_VERBOSE_LOGGING = "auth.verbose.logging";
   private static final String AUTH_REDIRECT_URI_PARAM = "redirect_uri";
@@ -64,6 +66,8 @@ public class AuthenticationController extends Controller {
   @Inject private SsoManager _ssoManager;
 
   @Inject AuthServiceClient _authClient;
+
+  @Inject GHNAuthenticationClient _ghnAuthenticationClient;
 
   @Inject
   public AuthenticationController(@Nonnull Config configs) {
@@ -147,7 +151,6 @@ public class AuthenticationController extends Controller {
     return Results.redirect(
         LOGIN_ROUTE + String.format("?%s=%s", ERROR_MESSAGE_URI_PARAM, SSO_DISABLED_ERROR_MESSAGE));
   }
-
   /**
    * Log in a user based on a username + password.
    *
@@ -182,14 +185,59 @@ public class AuthenticationController extends Controller {
     boolean loginSucceeded = tryLogin(username, password);
 
     if (!loginSucceeded) {
-      _logger.info("Login failed for user: {}", username);
       return Results.badRequest(invalidCredsJson);
     }
 
     final Urn actorUrn = new CorpuserUrn(username);
-    _logger.info("Login successful for user: {}, urn: {}", username, actorUrn);
     final String accessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
     return createSession(actorUrn.toString(), accessToken);
+  }
+
+  @Nonnull
+  public Result genAccessToken(Http.Request request) {
+    final JsonNode json = request.body().asJson();
+    // Get User-Agent from request headers
+    final Optional<String> userAgentOpt = request.header("User-Agent");
+    final String userAgent = userAgentOpt.orElse("Default User-Agent");
+    final String serviceToken = json.findPath("authorization_code").textValue();
+    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(serviceToken, userAgent);
+    if (response.getCode() != 200) {
+        return Results.badRequest(Json.newObject().put("message", response.getMessage()));
+        } else {
+        ObjectNode result = Json.newObject();
+        result.put("access_token", response.getData().get("access_token"));
+        return Results.ok(result);
+    }
+  }
+
+  @Nonnull
+  public Result verifyAccessToken(Http.Request request) {
+    final JsonNode json = request.body().asJson();
+    // Get User-Agent from request headers
+    final Optional<String> userAgentOpt = request.header("User-Agent");
+    final String userAgent = userAgentOpt.orElse("Default User-Agent");
+    final String accessToken = json.findPath("access_token").textValue();
+    final String remoteIp = json.findPath("remote_ip").textValue();
+    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.verifyAccessToken(accessToken, userAgent, remoteIp);
+    if (response.getCode() != 200) {
+        return Results.badRequest(Json.newObject().put("message", response.getMessage()));
+        } else {
+//        final String employeeId = response.getData().get("user_id");
+//        final GHNAuthenticationClient.EmployeeInfoResponse employeeInfo = _ghnAuthenticationClient.getEmployeeInfo(Integer.valueOf(employeeId));
+//        final String firstName = String.valueOf(employeeInfo.getData().get("full_name"));
+//        final String email = String.valueOf(employeeInfo.getData().get("personal_email"));
+        final String employeeId = "datahub";
+//        _ghnAuthenticationClient.provisionUser(new CorpuserUrn(employeeId), employeeId, String.format("%s@ghn.vn", employeeId));
+        final Urn actorUrn = new CorpuserUrn(employeeId);
+        final String datahubAccessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
+        return createSession(actorUrn.toString(), datahubAccessToken);
+    }
+  }
+
+  @Nonnull
+  public Result getRedirectUri(Http.Request request) {
+    final String redirectUri = _ghnAuthenticationClient.getRedirectUri();
+    return Results.ok(redirectUri);
   }
 
   /**
@@ -213,7 +261,7 @@ public class AuthenticationController extends Controller {
     final String email = json.findPath(EMAIL).textValue();
     final String title = json.findPath(TITLE).textValue();
     final String password = json.findPath(PASSWORD).textValue();
-    final String inviteToken = json.findPath(INVITE_TOKEN).textValue();
+    // final String inviteToken = json.findPath(INVITE_TOKEN).textValue();
 
     if (StringUtils.isBlank(fullName)) {
       JsonNode invalidCredsJson = Json.newObject().put("message", "Full name must not be empty.");
@@ -242,16 +290,15 @@ public class AuthenticationController extends Controller {
       return Results.badRequest(invalidCredsJson);
     }
 
-    if (StringUtils.isBlank(inviteToken)) {
-      JsonNode invalidCredsJson =
-          Json.newObject().put("message", "Invite token must not be empty.");
-      return Results.badRequest(invalidCredsJson);
-    }
+//     if (StringUtils.isBlank(inviteToken)) {
+//       JsonNode invalidCredsJson =
+//           Json.newObject().put("message", "Invite token must not be empty.");
+//       return Results.badRequest(invalidCredsJson);
+//     }
 
     final Urn userUrn = new CorpuserUrn(email);
     final String userUrnString = userUrn.toString();
-    _authClient.signUp(userUrnString, fullName, email, title, password, inviteToken);
-    _logger.info("Signed up user {} using invite tokens", userUrnString);
+    _authClient.signUp(userUrnString, fullName, email, title, password, "inviteToken");
     final String accessToken = _authClient.generateSessionTokenForUser(userUrn.getId());
     return createSession(userUrnString, accessToken);
   }
@@ -353,15 +400,15 @@ public class AuthenticationController extends Controller {
     // First try jaas login, if enabled
     if (_jaasConfigs.isJAASEnabled()) {
       try {
-        _logger.debug("Attempting JAAS authentication for user: {}", username);
+        _logger.debug("Attempting jaas authentication");
         AuthenticationManager.authenticateJaasUser(username, password);
-        _logger.debug("JAAS authentication successful. Login succeeded");
+        _logger.debug("Jaas authentication successful. Login succeeded");
         loginSucceeded = true;
       } catch (Exception e) {
         if (_verbose) {
-          _logger.debug("JAAS authentication error. Login failed", e);
+          _logger.debug("Jaas authentication error. Login failed", e);
         } else {
-          _logger.debug("JAAS authentication error. Login failed");
+          _logger.debug("Jaas authentication error. Login failed");
         }
       }
     }

@@ -47,7 +47,7 @@ export const EditorTheme: RemirrorThemeType = {
     },
 };
 
-export const EditorContainer = styled.div<{ editorStyle?: string }>`
+export const EditorContainer = styled.div`
     ${extensionBlockquoteStyledCss}
     ${extensionCalloutStyledCss}
     ${extensionCodeBlockStyledCss}
@@ -81,7 +81,6 @@ export const EditorContainer = styled.div<{ editorStyle?: string }>`
         line-height: 1.5;
         white-space: pre-wrap;
         margin: 0;
-        ${props => props.editorStyle}
 
         a {
             font-weight: 500;

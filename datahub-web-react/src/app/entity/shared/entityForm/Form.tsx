@@ -15,7 +15,6 @@ import FormRequestedBy from './FormSelectionModal/FormRequestedBy';
 import useHasComponentRendered from '../../../shared/useHasComponentRendered';
 import Loading from '../../../shared/Loading';
 import { DeferredRenderComponent } from '../../../shared/DeferredRenderComponent';
-import { Editor } from '../tabs/Documentation/components/editor/Editor';
 
 const TabWrapper = styled.div`
     background-color: ${ANTD_GRAY_V2[1]};
@@ -71,9 +70,7 @@ function Form({ formUrn }: Props) {
                     </RequestedByWrapper>
                 )}
                 {description ? (
-                    <SubTitle>
-                        <Editor content={description} readOnly editorStyle="padding: 0;" />
-                    </SubTitle>
+                    <SubTitle>{description}</SubTitle>
                 ) : (
                     <SubTitle>
                         Please fill out the following information for this {entityRegistry.getEntityName(entityType)} so
