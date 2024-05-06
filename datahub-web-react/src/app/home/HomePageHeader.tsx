@@ -254,15 +254,7 @@ export const HomePageHeader = () => {
             </Row>
             <HeaderContainer>
                 {showAcrylInfo && <AcrylDemoBanner />}
-                <Image
-                    src={
-                        appConfig.config !== DEFAULT_APP_CONFIG
-                            ? appConfig.config.visualConfig.logoUrl || themeConfig.assets.logoUrl
-                            : undefined
-                    }
-                    preview={false}
-                    style={styles.logoImage}
-                />
+                <Image src={themeConfig.assets.logoUrl} preview={false} style={styles.logoImage} />
                 {!!themeConfig.content.subtitle && (
                     <Typography.Text style={styles.subtitle}>{themeConfig.content.subtitle}</Typography.Text>
                 )}
