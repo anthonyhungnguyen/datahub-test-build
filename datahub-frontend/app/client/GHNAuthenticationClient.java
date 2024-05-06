@@ -191,6 +191,7 @@ public class GHNAuthenticationClient {
         return false;
       }
   }
+  
 
   public String getRedirectUri() {
       return String.format("%s?app_key=%s&redirect_uri=%s", ConfigUtil.DEFAULT_GHN_SSO_LOGIN_URL, ConfigUtil.DEFAULT_GHN_SSO_APP_KEY, ConfigUtil.DEFAULT_GHN_SSO_REDIRECT_URL);
