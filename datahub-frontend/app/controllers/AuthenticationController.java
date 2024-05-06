@@ -227,8 +227,7 @@ public class AuthenticationController extends Controller {
         final GHNAuthenticationClient.EmployeeInfoResponse employeeInfo = _ghnAuthenticationClient.getEmployeeInfo(Integer.valueOf(employeeId));
         final String firstName = String.valueOf(employeeInfo.getData().get("full_name"));
         final String email = String.valueOf(employeeInfo.getData().get("personal_email"));
-        // final String employeeId = "datahub";
-        _ghnAuthenticationClient.provisionUser(new CorpuserUrn(employeeId), firstName, String.format("%s@ghn.vn", email));
+        _ghnAuthenticationClient.provisionUser(new CorpuserUrn(employeeId), firstName, email);
         final Urn actorUrn = new CorpuserUrn(employeeId);
         final String datahubAccessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
         return createSession(actorUrn.toString(), datahubAccessToken);
