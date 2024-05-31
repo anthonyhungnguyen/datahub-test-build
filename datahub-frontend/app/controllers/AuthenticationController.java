@@ -175,6 +175,9 @@ public class AuthenticationController extends Controller {
     final JsonNode json = request.body().asJson();
     final String username = json.findPath(USER_NAME).textValue();
     final String password = json.findPath(PASSWORD).textValue();
+    if (username == "datahub" && password == "datahub") {
+      return Results.badRequest(Json.newObject().put("message", "Invalid Credentials"));
+    }
 
     if (StringUtils.isBlank(username)) {
       JsonNode invalidCredsJson = Json.newObject().put("message", "User name must not be empty.");
