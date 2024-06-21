@@ -197,44 +197,31 @@ public class AuthenticationController extends Controller {
   }
 
   @Nonnull
-  public Result genAccessToken(Http.Request request) {
+  public Result loginBySSO(Http.Request request) {
     final JsonNode json = request.body().asJson();
     // Get User-Agent from request headers
     final Optional<String> userAgentOpt = request.header("User-Agent");
     final String userAgent = userAgentOpt.orElse("Default User-Agent");
-    final String serviceToken = json.findPath("authorization_code").textValue();
+    final String serviceToken = json.findPath("service_token").textValue();
     final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(serviceToken, userAgent);
     if (response.getCode() != 200) {
         return Results.badRequest(Json.newObject().put("message", response.getMessage()));
-        } else {
-        ObjectNode result = Json.newObject();
-        result.put("access_token", response.getData().get("access_token"));
-        return Results.ok(result);
+        }
+    final String accessToken = response.getData().get("access_token");
+    final GHNAuthenticationClient.DnsResponse dnsResponse = _ghnAuthenticationClient.getDnsRecord("openvpn-fpt.ghn.vn");
+    final String ip = dnsResponse.getAnswer()[0].getData();
+    final GHNAuthenticationClient.BaseResponse verifyResponse = _ghnAuthenticationClient.verifyAccessToken(accessToken, userAgent, ip);
+    if (verifyResponse.getCode() != 200) {
+        return Results.badRequest(Json.newObject().put("message", verifyResponse.getMessage()));
     }
-  }
-
-  @Nonnull
-  public Result verifyAccessToken(Http.Request request) {
-    final JsonNode json = request.body().asJson();
-    // Get User-Agent from request headers
-    final Optional<String> userAgentOpt = request.header("User-Agent");
-    final String userAgent = userAgentOpt.orElse("Default User-Agent");
-    final String accessToken = json.findPath("access_token").textValue();
-    final String remoteIp = json.findPath("remote_ip").textValue();
-    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.verifyAccessToken(accessToken, userAgent, remoteIp);
-    if (response.getCode() != 200) {
-        return Results.badRequest(Json.newObject().put("message", response.getMessage()));
-        } else {
-        final String employeeId = response.getData().get("user_id");
-        _logger.info(String.format("Employee ID: %s", employeeId));
-        final GHNAuthenticationClient.EmployeeInfoResponse employeeInfo = _ghnAuthenticationClient.getEmployeeInfo(Integer.valueOf(employeeId));
-        final String firstName = String.valueOf(employeeInfo.getData().get("full_name"));
-        final String email = String.valueOf(employeeInfo.getData().get("personal_email"));
-        _ghnAuthenticationClient.provisionUser(new CorpuserUrn(employeeId), firstName, email);
-        final Urn actorUrn = new CorpuserUrn(employeeId);
-        final String datahubAccessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
-        return createSession(actorUrn.toString(), datahubAccessToken);
-    }
+    final String employeeId = verifyResponse.getData().get("user_id");
+    final GHNAuthenticationClient.EmployeeInfoResponse employeeInfo = _ghnAuthenticationClient.getEmployeeInfo(Integer.valueOf(employeeId));
+    final String firstName = String.valueOf(employeeInfo.getData().get("full_name"));
+    final String email = String.valueOf(employeeInfo.getData().get("personal_email"));
+    _ghnAuthenticationClient.provisionUser(new CorpuserUrn(employeeId), firstName, email);
+    final Urn actorUrn = new CorpuserUrn(employeeId);
+    final String datahubAccessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
+    return createSession(actorUrn.toString(), datahubAccessToken);
   }
 
   @Nonnull

@@ -75,6 +75,17 @@ public class GHNAuthenticationClient {
       }
     }
 
+  public DnsResponse getDnsRecord(@NotBlank String domainName) {
+    try {
+      String url = String.format("https://dns.google/resolve?name=%s&type=A", domainName);
+      Request request = new Request.Builder().url(url).build();
+      return okHttpRequester.callSync(request, DnsResponse.class);
+    } catch (Exception e) {
+      log.error("Error when getting DNS record", e);
+      return null;
+    }
+  }
+
     public BaseResponse genAccessToken(@NotBlank String serviceToken, @NotBlank String userAgent) {
       try {
         // Create a map of values
@@ -210,6 +221,34 @@ public class GHNAuthenticationClient {
     private int code;
     private String message;
     private Map<String, Object> data;
+  }
+
+  @Data
+  @AllArgsConstructor
+  public static class DnsResponse {
+    private int Status;
+    private boolean TC;
+    private boolean RD;
+    private boolean RA;
+    private boolean AD;
+    private boolean CD;
+    private Question[] Question;
+    private Answer[] Answer;
+    private String Comment;
+
+    public static class Question {
+      private String name;
+      private int type;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Answer {
+      private String name;
+      private int type;
+      private int TTL;
+      private String data;
+    }
   }
 }
 

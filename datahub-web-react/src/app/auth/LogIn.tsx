@@ -101,26 +101,11 @@ export const LogIn: React.VFC<LogInProps> = () => {
                     body: JSON.stringify({ authorization_code: code }),
                 };
 
-                fetch('/genAccessToken', requestOptions)
+                fetch('/loginBySSO', requestOptions)
                     .then(async (response) => {
                         const data = await response.json();
-                        if (!response.ok) {
-                            const error = (data && data.message) || response.status;
-                            return Promise.reject(error);
-                        }
-                        const ipResponse = await fetch('https://api.ipify.org?format=json', { method: 'GET' });
-                        const ipData = await ipResponse.json();
-                        const remoteIp = ipData.ip;
-                        const verifyRequestOptions = {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ...data, remote_ip: remoteIp }),
-                        };
-                        return fetch('/verifyAccessToken', verifyRequestOptions);
-                    })
-                    .then(async (verifyResponse) => {
-                        if (!verifyResponse.ok) {
-                            const error = verifyResponse.status;
+                        if (!data.ok) {
+                            const error = data.status;
                             return Promise.reject(error);
                         }
                         isLoggedInVar(true);
