@@ -201,6 +201,7 @@ public class AuthenticationController extends Controller {
     final JsonNode json = request.body().asJson();
     // Get User-Agent from request headers
     final String remoteIp = request.remoteAddress();
+    _logger.info("Remote IP: " + remoteIp);
     final Optional<String> userAgentOpt = request.header("User-Agent");
     final String userAgent = userAgentOpt.orElse("Default User-Agent");
     final String serviceToken = json.findPath("service_token").textValue();
