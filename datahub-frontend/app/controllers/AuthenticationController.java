@@ -200,17 +200,16 @@ public class AuthenticationController extends Controller {
   public Result loginBySSO(Http.Request request) {
     final JsonNode json = request.body().asJson();
     // Get User-Agent from request headers
+    final String remoteIp = request.remoteAddress();
     final Optional<String> userAgentOpt = request.header("User-Agent");
     final String userAgent = userAgentOpt.orElse("Default User-Agent");
     final String serviceToken = json.findPath("service_token").textValue();
-    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(serviceToken, userAgent);
+    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(serviceToken, userAgent, remoteIp);
     if (response.getCode() != 200) {
         return Results.badRequest(Json.newObject().put("message", response.getMessage()));
         }
     final String accessToken = response.getData().get("access_token");
-    final GHNAuthenticationClient.DnsResponse dnsResponse = _ghnAuthenticationClient.getDnsRecord("openvpn-fpt.ghn.vn");
-    final String ip = dnsResponse.getAnswer()[0].getData();
-    final GHNAuthenticationClient.BaseResponse verifyResponse = _ghnAuthenticationClient.verifyAccessToken(accessToken, userAgent, ip);
+    final GHNAuthenticationClient.BaseResponse verifyResponse = _ghnAuthenticationClient.verifyAccessToken(accessToken, userAgent, remoteIp);
     if (verifyResponse.getCode() != 200) {
         return Results.badRequest(Json.newObject().put("message", verifyResponse.getMessage()));
     }

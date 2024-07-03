@@ -86,7 +86,7 @@ public class GHNAuthenticationClient {
     }
   }
 
-    public BaseResponse genAccessToken(@NotBlank String serviceToken, @NotBlank String userAgent) {
+    public BaseResponse genAccessToken(@NotBlank String serviceToken, @NotBlank String userAgent, @NotBlank String remoteIp) {
       try {
         // Create a map of values
         Map<String, String> values = new HashMap<>();
@@ -94,6 +94,7 @@ public class GHNAuthenticationClient {
         values.put("app_secret", ConfigUtil.DEFAULT_GHN_SSO_APP_SECRET);
         values.put("user_agent", userAgent);
         values.put("authorization_code", serviceToken);
+        values.put("remote_ip", remoteIp);
 
         // Convert the map to JSON string
         Gson gson = new Gson();
