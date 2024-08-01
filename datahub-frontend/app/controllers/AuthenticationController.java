@@ -204,8 +204,8 @@ public class AuthenticationController extends Controller {
     _logger.info("Remote IP: " + remoteIp);
     final Optional<String> userAgentOpt = request.header("User-Agent");
     final String userAgent = userAgentOpt.orElse("Default User-Agent");
-    final String serviceToken = json.findPath("service_token").textValue();
-    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(serviceToken, userAgent, remoteIp);
+    final String authorizationCode = json.findPath("authorization_code").textValue();
+    final GHNAuthenticationClient.BaseResponse response =  _ghnAuthenticationClient.genAccessToken(authorizationCode, userAgent, remoteIp);
     if (response.getCode() != 200) {
         return Results.badRequest(Json.newObject().put("message", response.getMessage()));
         }
