@@ -26,6 +26,7 @@
     },
     "content": {
         "title": "DataHub",
+        "subtitle": "Bằng cách sử dụng công cụ này, bạn đồng ý với Quy định và Chính sách bảo mật dữ liệu của GHN",
         "homepage": {
             "homepageMessage": "Find data you can count(*) on"
         },
