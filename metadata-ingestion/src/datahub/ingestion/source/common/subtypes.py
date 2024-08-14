@@ -35,6 +35,7 @@ class DatasetContainerSubTypes(str, Enum):
     FOLDER = "Folder"
     S3_BUCKET = "S3 bucket"
     GCS_BUCKET = "GCS bucket"
+    ABS_CONTAINER = "ABS container"
 
 
 class BIContainerSubTypes(str, Enum):
@@ -48,6 +49,7 @@ class BIContainerSubTypes(str, Enum):
     QLIK_APP = "Qlik App"
     SIGMA_WORKSPACE = "Sigma Workspace"
     SIGMA_WORKBOOK = "Sigma Workbook"
+    MODE_COLLECTION = "Collection"
 
 
 class JobContainerSubTypes(str, Enum):
@@ -64,3 +66,8 @@ class BIAssetSubTypes(str, Enum):
     # PowerBI
     POWERBI_TILE = "PowerBI Tile"
     POWERBI_PAGE = "PowerBI Page"
+
+    # Mode
+    MODE_REPORT = "Report"
+    MODE_QUERY = "Query"
+    MODE_CHART = "Chart"

@@ -10,6 +10,7 @@ configurations {
 dependencies {
   implementation project(':entity-registry')
   implementation project(':metadata-service:auth-config')
+  api project(':metadata-io:metadata-io-api')
   api project(':metadata-utils')
   api project(':metadata-events:mxe-avro')
   api project(':metadata-events:mxe-registration')
@@ -20,12 +21,14 @@ dependencies {
   api project(':metadata-service:services')
   api project(':metadata-operation-context')
 
+  implementation spec.product.pegasus.restliServer
   implementation spec.product.pegasus.data
   implementation spec.product.pegasus.generator
 
   implementation externalDependency.guava
   implementation externalDependency.reflections
-  implementation externalDependency.jsonPatch
+
+  implementation 'com.github.java-json-tools:json-patch:1.13' // TODO: Replace with jakarta.json
   api(externalDependency.dgraph4j) {
     exclude group: 'com.google.guava', module: 'guava'
     exclude group: 'io.grpc', module: 'grpc-protobuf'
@@ -90,6 +93,8 @@ dependencies {
   testImplementation 'ch.qos.logback:logback-classic:1.4.7'
   testImplementation 'net.datafaker:datafaker:1.9.0'
 
+  testImplementation(testFixtures(project(":entity-registry")))
+
   testAnnotationProcessor externalDependency.lombok
 
   constraints {
@@ -125,6 +130,7 @@ test {
     // override, testng controlling parallelization
     // increasing >1 will merely run all tests extra times
     maxParallelForks = 1
+    environment "ELASTIC_ID_HASH_ALGO", "MD5"
   }
   useTestNG() {
     suites 'src/test/resources/testng.xml'

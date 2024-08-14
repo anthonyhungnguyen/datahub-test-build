@@ -11,13 +11,15 @@ from datahub.ingestion.glossary.classifier import (
     DynamicTypedClassifierConfig,
 )
 from datahub.ingestion.glossary.datahub_classifier import DataHubClassifierConfig
-from datahub.ingestion.source.bigquery_v2.bigquery import BigqueryV2Source
 from datahub.ingestion.source.bigquery_v2.bigquery_data_reader import BigQueryDataReader
 from datahub.ingestion.source.bigquery_v2.bigquery_schema import (
     BigqueryColumn,
     BigqueryDataset,
     BigQuerySchemaApi,
     BigqueryTable,
+)
+from datahub.ingestion.source.bigquery_v2.bigquery_schema_gen import (
+    BigQuerySchemaGenerator,
 )
 from tests.test_helpers import mce_helpers
 from tests.test_helpers.state_helpers import run_and_get_pipeline
@@ -39,13 +41,15 @@ def random_email():
 
 @freeze_time(FROZEN_TIME)
 @patch.object(BigQuerySchemaApi, "get_tables_for_dataset")
-@patch.object(BigqueryV2Source, "get_core_table_details")
+@patch.object(BigQuerySchemaGenerator, "get_core_table_details")
 @patch.object(BigQuerySchemaApi, "get_datasets_for_project_id")
 @patch.object(BigQuerySchemaApi, "get_columns_for_dataset")
 @patch.object(BigQueryDataReader, "get_sample_data_for_table")
 @patch("google.cloud.bigquery.Client")
+@patch("google.cloud.datacatalog_v1.PolicyTagManagerClient")
 def test_bigquery_v2_ingest(
     client,
+    policy_tag_manager_client,
     get_sample_data_for_table,
     get_columns_for_dataset,
     get_datasets_for_project_id,
@@ -55,7 +59,7 @@ def test_bigquery_v2_ingest(
     tmp_path,
 ):
     test_resources_dir = pytestconfig.rootpath / "tests/integration/bigquery_v2"
-    mcp_golden_path = "{}/bigquery_mcp_golden.json".format(test_resources_dir)
+    mcp_golden_path = f"{test_resources_dir}/bigquery_mcp_golden.json"
     mcp_output_path = "{}/{}".format(tmp_path, "bigquery_mcp_output.json")
 
     get_datasets_for_project_id.return_value = [
@@ -78,6 +82,7 @@ def test_bigquery_v2_ingest(
                 comment="comment",
                 is_partition_column=False,
                 cluster_column_position=None,
+                policy_tags=["Test Policy Tag"],
             ),
             BigqueryColumn(
                 name="email",

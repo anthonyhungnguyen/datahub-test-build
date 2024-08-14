@@ -28,7 +28,7 @@ HOSTED_DOCS_ONLY-->
 [![PyPI version](https://badge.fury.io/py/acryl-datahub.svg)](https://badge.fury.io/py/acryl-datahub)
 [![build & test](https://github.com/datahub-project/datahub/workflows/build%20&%20test/badge.svg?branch=master&event=push)](https://github.com/datahub-project/datahub/actions?query=workflow%3A%22build+%26+test%22+branch%3Amaster+event%3Apush)
 [![Docker Pulls](https://img.shields.io/docker/pulls/acryldata/datahub-gms.svg)](https://hub.docker.com/r/acryldata/datahub-gms)
-[![Slack](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://datahubproject.io/slack?utm_source=docs&utm_medium=docs&utm_campaign=docs_page_link)
+[![Slack](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://datahubproject.io/slack?utm_source=github&utm_medium=readme&utm_campaign=github_readme)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/datahub-project/datahub/blob/master/docs/CONTRIBUTING.md)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/datahub-project/datahub)](https://github.com/datahub-project/datahub/pulls?q=is%3Apr)
 [![License](https://img.shields.io/github/license/datahub-project/datahub)](https://github.com/datahub-project/datahub/blob/master/LICENSE)
@@ -106,7 +106,7 @@ We welcome contributions from the community. Please refer to our [Contributing G
 
 ## Community
 
-Join our [Slack workspace](https://datahubproject.io/slack?utm_source=docs&utm_medium=docs&utm_campaign=docs_page_link) for discussions and important announcements. You can also find out more about our upcoming [town hall meetings](docs/townhalls.md) and view past recordings.
+Join our [Slack workspace](https://datahubproject.io/slack?utm_source=github&utm_medium=readme&utm_campaign=github_readme) for discussions and important announcements. You can also find out more about our upcoming [town hall meetings](docs/townhalls.md) and view past recordings.
 
 ## Adoption
 
@@ -118,6 +118,7 @@ Here are the companies that have officially adopted DataHub. Please feel free to
 - [Cabify](https://cabify.tech/)
 - [ClassDojo](https://www.classdojo.com/)
 - [Coursera](https://www.coursera.org/)
+- [CVS Health](https://www.cvshealth.com/)
 - [DefinedCrowd](http://www.definedcrowd.com)
 - [DFDS](https://www.dfds.com/)
 - [Digital Turbine](https://www.digitalturbine.com/)
@@ -137,7 +138,6 @@ Here are the companies that have officially adopted DataHub. Please feel free to
 - [Peloton](https://www.onepeloton.com)
 - [PITS Global Data Recovery Services](https://www.pitsdatarecovery.net/)
 - [Razer](https://www.razer.com)
-- [Saxo Bank](https://www.home.saxo)
 - [Showroomprive](https://www.showroomprive.com/)
 - [SpotHero](https://spothero.com)
 - [Stash](https://www.stash.com)
