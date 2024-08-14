@@ -223,6 +223,7 @@ public class AuthenticationController extends Controller {
     final String datahubAccessToken = _authClient.generateSessionTokenForUser(actorUrn.getId());
     return createSession(actorUrn.toString(), datahubAccessToken);
   }
+  
 
   @Nonnull
   public Result getRedirectUri(Http.Request request) {
