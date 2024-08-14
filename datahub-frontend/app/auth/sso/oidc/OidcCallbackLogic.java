@@ -405,7 +405,7 @@ public class OidcCallbackLogic extends DefaultCallbackLogic<Result, PlayWebConte
     return groupMembershipAspect;
   }
 
-  private void tryProvisionUser(@Nonnull OperationContext opContext, CorpUserSnapshot corpUserSnapshot) {
+  public void tryProvisionUser(@Nonnull OperationContext opContext, CorpUserSnapshot corpUserSnapshot) {
 
     log.debug(String.format("Attempting to provision user with urn %s", corpUserSnapshot.getUrn()));
 
