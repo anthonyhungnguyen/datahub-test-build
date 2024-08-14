@@ -547,7 +547,7 @@ public class OidcCallbackLogic extends DefaultCallbackLogic<Result, PlayWebConte
     }
   }
 
-  private void setUserStatus(@Nonnull OperationContext opContext, final Urn urn, final CorpUserStatus newStatus) throws Exception {
+  public void setUserStatus(@Nonnull OperationContext opContext, final Urn urn, final CorpUserStatus newStatus) throws Exception {
     // Update status aspect to be active.
     final MetadataChangeProposal proposal = new MetadataChangeProposal();
     proposal.setEntityUrn(urn);
