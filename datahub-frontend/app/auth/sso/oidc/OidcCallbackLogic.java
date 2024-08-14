@@ -211,6 +211,8 @@ public class OidcCallbackLogic extends DefaultCallbackLogic<Result, PlayWebConte
                 "Failed to perform post authentication steps. Error message: %s", e.getMessage()));
       }
 
+      log.info("OIDC callback authentication successful for user: {}", userName);
+
       // Successfully logged in - Generate GMS login token
       final String accessToken = authClient.generateSessionTokenForUser(corpUserUrn.getId());
       return result
@@ -403,7 +405,7 @@ public class OidcCallbackLogic extends DefaultCallbackLogic<Result, PlayWebConte
     return groupMembershipAspect;
   }
 
-  public void tryProvisionUser(@Nonnull OperationContext opContext, CorpUserSnapshot corpUserSnapshot) {
+  private void tryProvisionUser(@Nonnull OperationContext opContext, CorpUserSnapshot corpUserSnapshot) {
 
     log.debug(String.format("Attempting to provision user with urn %s", corpUserSnapshot.getUrn()));
 
@@ -545,7 +547,7 @@ public class OidcCallbackLogic extends DefaultCallbackLogic<Result, PlayWebConte
     }
   }
 
-  public void setUserStatus(@Nonnull OperationContext opContext, final Urn urn, final CorpUserStatus newStatus) throws Exception {
+  private void setUserStatus(@Nonnull OperationContext opContext, final Urn urn, final CorpUserStatus newStatus) throws Exception {
     // Update status aspect to be active.
     final MetadataChangeProposal proposal = new MetadataChangeProposal();
     proposal.setEntityUrn(urn);
