@@ -109,45 +109,21 @@ export const LogIn: React.VFC<LogInProps> = () => {
                             return Promise.reject(error);
                         }
                         isLoggedInVar(true);
-                        refreshContext();
+                        refreshContext()
                         analytics.event({ type: EventType.LogInEvent });
                         return Promise.resolve();
                     })
                     .catch((e) => {
                         console.error('Failed to log in! An unexpected error occurred.', e);
                     })
-                    .finally(() => setLoading(false));
+                    .finally(() => {
+                        setLoading(false)
+                        // Reload window
+                        window.location.reload();
+                    });
             }
         }
     }, [redirectUri, refreshContext]);
-
-    const handleLogin = useCallback(
-        (values: FormValues) => {
-            setLoading(true);
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: values.username, password: values.password }),
-            };
-            fetch('/logIn', requestOptions)
-                .then(async (response) => {
-                    if (!response.ok) {
-                        const data = await response.json();
-                        const error = (data && data.message) || response.status;
-                        return Promise.reject(error);
-                    }
-                    isLoggedInVar(true);
-                    refreshContext();
-                    analytics.event({ type: EventType.LogInEvent });
-                    return Promise.resolve();
-                })
-                .catch((_) => {
-                    message.error(`Failed to log in! An unexpected error occurred.`);
-                })
-                .finally(() => setLoading(false));
-        },
-        [refreshContext],
-    );
 
     if (isLoggedIn) {
         const maybeRedirectUri = params.redirect_uri;
@@ -166,40 +142,6 @@ export const LogIn: React.VFC<LogInProps> = () => {
                 </div>
                 <div className={styles.login_form_box}>
                     {loading && <Message type="loading" content="Logging in..." />}
-                    <Form onFinish={handleLogin} layout="vertical">
-                        <Form.Item
-                            name="username"
-                            // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                            label={<label style={{ color: 'white' }}>Username</label>}
-                        >
-                            <FormInput prefix={<UserOutlined />} data-testid="username" />
-                        </Form.Item>
-                        <Form.Item
-                            name="password"
-                            // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                            label={<label style={{ color: 'white' }}>Password</label>}
-                        >
-                            <FormInput prefix={<LockOutlined />} type="password" data-testid="password" />
-                        </Form.Item>
-                        <Form.Item style={{ marginBottom: '0px' }} shouldUpdate>
-                            {({ getFieldsValue }) => {
-                                const { username, password } = getFieldsValue();
-                                const formIsComplete = !!username && !!password;
-                                return (
-                                    <Button
-                                        type="primary"
-                                        block
-                                        htmlType="submit"
-                                        className={styles.login_button}
-                                        disabled={!formIsComplete}
-                                    >
-                                        Sign In
-                                    </Button>
-                                );
-                            }}
-                        </Form.Item>
-                    </Form>
-                    <SsoDivider />
                     <SsoButton
                         type="primary"
                         onClick={redirectSSO}
