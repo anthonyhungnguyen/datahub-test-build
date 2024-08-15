@@ -111,6 +111,8 @@ export const LogIn: React.VFC<LogInProps> = () => {
                         isLoggedInVar(true);
                         refreshContext()
                         analytics.event({ type: EventType.LogInEvent });
+                        // Reload window
+                        window.location.reload();
                         return Promise.resolve();
                     })
                     .catch((e) => {
@@ -118,8 +120,6 @@ export const LogIn: React.VFC<LogInProps> = () => {
                     })
                     .finally(() => {
                         setLoading(false)
-                        // Reload window
-                        window.location.reload();
                     });
             }
         }
