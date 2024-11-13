@@ -241,7 +241,7 @@ jobs:
       uses: ishworkh/docker-image-artifact-download@v1
       if: ${{ needs.setup.outputs.publish != 'true' && needs.setup.outputs.pr-publish != 'true' && needs.setup.outputs.ingestion_base_change == 'true' }}
       with:
-        image: ${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}
+        image: ${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'master' }}
     - name: Login to DockerHub
       uses: docker/login-action@v3
       if: ${{ needs.setup.outputs.docker-login == 'true' && needs.setup.outputs.publish == 'false' && needs.setup.outputs.pr-publish == 'false' && needs.setup.outputs.ingestion_base_change == 'false' }}
@@ -260,7 +260,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         build-args: |
           APP_ENV=full
-          BASE_IMAGE=${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}
+          BASE_IMAGE=${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'master' }}
         publish: ${{ needs.setup.outputs.publish == 'true' || needs.setup.outputs.pr-publish == 'true' }}
         context: .
         file: ./docker/datahub-ingestion-base/Dockerfile
