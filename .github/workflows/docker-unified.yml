@@ -318,7 +318,7 @@ jobs:
           ${{ env.DATAHUB_INGESTION_IMAGE }}
         build-args: |
           BASE_IMAGE=${{ env.DATAHUB_INGESTION_BASE_IMAGE }}
-          DOCKER_VERSION=${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}
+          DOCKER_VERSION=${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'master' }}
           RELEASE_VERSION=${{ needs.setup.outputs.python_release_version }}
         image_tag: ${{ needs.setup.outputs.tag }}
         username: ${{ secrets.DOCKER_USERNAME }}
