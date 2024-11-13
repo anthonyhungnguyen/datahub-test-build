@@ -222,6 +222,53 @@ jobs:
     - name: Compute DataHub Ingestion (Base) Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}" >> "$GITHUB_OUTPUT"
+  datahub_ingestion_base_full_build:
+    name: Build and Push DataHub Ingestion (Base-Full) Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    needs: [ setup, datahub_ingestion_base_build ]
+    if: ${{ needs.setup.outputs.ingestion_change == 'true' || needs.setup.outputs.publish == 'true' || needs.setup.outputs.pr-publish == 'true' }}
+    steps:
+    - name: Free up disk space
+      run: |
+        sudo apt-get remove 'dotnet-*' azure-cli || true
+        sudo rm -rf /usr/local/lib/android/ || true
+        sudo docker image prune -a -f || true
+    - name: Check out the repo
+      uses: acryldata/sane-checkout-action@v3
+    - name: Download Base Image
+      uses: ishworkh/docker-image-artifact-download@v1
+      if: ${{ needs.setup.outputs.publish != 'true' && needs.setup.outputs.pr-publish != 'true' && needs.setup.outputs.ingestion_base_change == 'true' }}
+      with:
+        image: ${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      if: ${{ needs.setup.outputs.docker-login == 'true' && needs.setup.outputs.publish == 'false' && needs.setup.outputs.pr-publish == 'false' && needs.setup.outputs.ingestion_base_change == 'false' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build and push (Base-Full) Image
+      if: ${{ needs.setup.outputs.ingestion_base_change == 'true' }}
+      uses: ./.github/actions/docker-custom-build-and-push
+      with:
+        target: full-install
+        images: |
+          ${{ env.DATAHUB_INGESTION_BASE_IMAGE }}
+        image_tag: ${{ needs.setup.outputs.full_tag }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        build-args: |
+          APP_ENV=full
+          BASE_IMAGE=${{ env.DATAHUB_INGESTION_BASE_IMAGE }}:${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_tag || 'head' }}
+        publish: ${{ needs.setup.outputs.publish == 'true' || needs.setup.outputs.pr-publish == 'true' }}
+        context: .
+        file: ./docker/datahub-ingestion-base/Dockerfile
+        platforms: linux/amd64,linux/arm64/v8
+    - name: Compute DataHub Ingestion (Base-Full) Tag
+      id: tag
+      run: echo "tag=${{ needs.setup.outputs.ingestion_base_change == 'true' && needs.setup.outputs.unique_full_tag || 'head' }}" >> "$GITHUB_OUTPUT"
+
   datahub_ingestion_full_build:
     name: Build and Push DataHub Ingestion (Full) Docker Images
     runs-on: ubuntu-latest
